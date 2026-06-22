@@ -53,7 +53,7 @@ aj.exe program.exe -f tests.txt
 Output all detailed results per case:
 
 ```bat
-aj.exe program.exe -f "tests.txt" -a
+aj.exe program.exe -f tests.txt -a
 ```
 
 Override limits for a single run:
