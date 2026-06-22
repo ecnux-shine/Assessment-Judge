@@ -578,7 +578,7 @@ int main(int argc, char* argv[]) {
 
     if (!inlineInput.empty()) {
         RunResult run = runProcess(targetExe.value(), args, inlineInput, limits, false, false, false, true);
-        std::cout << "------------------------------\n";
+        std::cout << "\n------------------------------\n";
         if (run.timedOut) {
             std::cout << "Status: TEL\n";
         } else if (run.memExceeded) {
@@ -593,7 +593,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    std::cout << "------------------------------\n";
+    std::cout << "\n------------------------------\n";
     RunResult run = runProcess(targetExe.value(), args, std::string(), limits, true, false, false, true);
     if (run.timedOut) {
         std::cout << "Status: TEL\n";
