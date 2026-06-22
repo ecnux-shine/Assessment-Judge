@@ -1,5 +1,7 @@
 # Assessment Judge (AJ)
 
+[English](README.md) | 简体中文
+
 一个 Windows C++ 命令行工具，可以在模拟终端环境下运行 `.exe` 程序，并报告执行时间和内存占用。
 
 ## 功能特性
