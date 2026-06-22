@@ -79,7 +79,7 @@ Status: TEL
 使用 `-f` 参数指定测试数据文件：
 
 ```batch
-aj.exe program.exe -f "tests.txt"
+aj.exe program.exe -f tests.txt
 ```
 
 测试文件使用空行分隔测试点。
@@ -100,7 +100,7 @@ All Statuses: AC: 31/40      TEL: 2/40      WA: 8/40      MLE: 0/40
 在批量测试模式中添加 `-a` 参数以输出每次测试的详细结果：
 
 ```batch
-aj.exe program.exe -f "tests.txt" -a
+aj.exe program.exe -f tests.txt -a
 ```
 
 输出示例：
