@@ -12,17 +12,29 @@
 
 ## 编译
 
-使用 MinGW 或 MSYS2：
+### 方案一：MSVC（Visual Studio）
+
+使用 **Visual Studio 开发者命令提示符**（Developer Command Prompt for Visual Studio）：
 
 ```batch
-g++ aj.cpp -std=c++17 -O2 -o aj.exe -lpsapi
+cd path\to\AssessmentJudge
+rc /fo assets\resource.res assets\resource.rc
+cl /EHsc aj.cpp assets\resource.res psapi.lib
 ```
 
-使用 MSVC（Visual Studio 开发者命令提示符）：
+这将生成带有 favicon 图标的 `aj.exe`。
 
-```batch
-cl /EHsc aj.cpp psapi.lib
+### 方案二：MinGW/GCC（MSYS2 或独立版）
+
+在 shell 中运行：
+
+```bash
+cd path/to/AssessmentJudge
+windres assets/resource.rc -o assets/resource.o
+g++ aj.cpp assets/resource.o -std=c++17 -O2 -o aj.exe -lpsapi
 ```
+
+这将生成带有 favicon 图标的 `aj.exe`。
 
 ## 使用方法
 
