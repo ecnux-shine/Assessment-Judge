@@ -292,7 +292,7 @@ static RunResult runProcess(
 
     if (interactiveInput) {
         while (true) {
-            DWORD wait = WaitForSingleObject(pi.hProcess, 0);
+            DWORD wait = WaitForSingleObject(pi.hProcess, 100);
             if (wait == WAIT_OBJECT_0) break;
             pauseTimer();
             std::string line;
@@ -303,6 +303,8 @@ static RunResult runProcess(
             line.push_back('\n');
             DWORD written = 0;
             WriteFile(childStdInWrite, line.data(), (DWORD)line.size(), &written, NULL);
+            FlushFileBuffers(childStdInWrite);
+            Sleep(50);
         }
         CloseHandle(childStdInWrite);
     }
@@ -500,7 +502,7 @@ int main(int argc, char* argv[]) {
                     if (idx) groupInput += " ";
                     groupInput += tokens[idx];
                 }
-                RunResult probe = runProcess(targetExe.value(), args, groupInput, limits, false, true, true, false);
+                RunResult probe = runProcess(targetExe.value(), args, groupInput, limits, false, false, false, false);
                 if (!probe.launched) continue;
                 if (!probe.timedOut && !probe.memExceeded && probe.exitCode == 0) {
                     groupSize = trySize;
@@ -526,9 +528,10 @@ int main(int argc, char* argv[]) {
                 groupInput += tokens[groupIndex * groupSize + j];
             }
             if (allDetails) {
-                std::cout << "##########[" << (groupIndex + 1) << "]##########\n\n";
+                std::cout << "====================[" << (groupIndex + 1) << "]====================\n";
+                std::cout << "------------------------------\n";
             }
-            RunResult run = runProcess(targetExe.value(), args, groupInput, limits, false, false, false, true);
+            RunResult run = runProcess(targetExe.value(), args, groupInput, limits, false, false, false, allDetails);
             executedRuns += 1;
             totalTime += run.elapsedMs;
             totalMemory += run.peakMemoryBytes;
@@ -544,6 +547,7 @@ int main(int argc, char* argv[]) {
             }
             stats[status] += 1;
             if (allDetails) {
+                std::cout << "\n------------------------------\n";
                 std::cout << "Status: " << status << "\n";
                 std::cout << "Time: " << run.elapsedMs << "ms\n";
                 std::cout << "Memory: " << formatMemory(run.peakMemoryBytes) << " MB\n";
@@ -552,20 +556,28 @@ int main(int argc, char* argv[]) {
         }
 
         if (remainder > 0) {
+            executedRuns += 1;
             stats["WA"] += 1;
+            if (allDetails) {
+                std::cout << "====================[" << (totalGroups + 1) << "]====================\n";
+                std::cout << "------------------------------\n";
+                std::cout << "Status: WA\n";
+                std::cout << "Reason: Insufficient input tokens (need " << groupSize << ", got " << remainder << ")\n";
+                std::cout << "------------------------------\n\n";
+            }
         }
 
         if (!allDetails) {
-            if (executedRuns > 0) {
-                uint64_t avgTime = totalTime / executedRuns;
-                uint64_t avgMemory = totalMemory / executedRuns;
+            if (executedRuns - (remainder > 0 ? 1 : 0) > 0) {
+                uint64_t avgTime = totalTime / (executedRuns - (remainder > 0 ? 1 : 0));
+                uint64_t avgMemory = totalMemory / (executedRuns - (remainder > 0 ? 1 : 0));
                 std::cout << "Average Time: " << avgTime << "ms\n";
                 std::cout << "Average Memory: " << formatMemory(avgMemory) << " MB\n";
             } else {
                 std::cout << "Average Time: 0ms\n";
                 std::cout << "Average Memory: 0.0 MB\n";
             }
-            int totalCount = executedRuns + (remainder > 0 ? 1 : 0);
+            int totalCount = executedRuns;
             std::cout << "All Statuses: ";
             std::cout << "AC: " << stats["AC"] << "/" << totalCount << "      ";
             std::cout << "TEL: " << stats["TEL"] << "/" << totalCount << "      ";
@@ -577,6 +589,35 @@ int main(int argc, char* argv[]) {
     }
 
     if (!inlineInput.empty()) {
+        std::vector<std::string> inlineTokens = splitTokens(inlineInput);
+        
+        // Auto-detect required input count
+        int requiredCount = inlineTokens.size();
+        int maxTry = (int)std::min<size_t>(10, inlineTokens.size());
+        for (int trySize = 1; trySize <= maxTry; ++trySize) {
+            std::string testInput;
+            for (int idx = 0; idx < trySize && idx < (int)inlineTokens.size(); ++idx) {
+                if (idx) testInput += " ";
+                testInput += inlineTokens[idx];
+            }
+            RunResult probe = runProcess(targetExe.value(), args, testInput, limits, false, false, false, false);
+            if (!probe.launched) continue;
+            if (!probe.timedOut && !probe.memExceeded && probe.exitCode == 0) {
+                requiredCount = trySize;
+                break;
+            }
+        }
+        
+        // Check if input is sufficient
+        if ((int)inlineTokens.size() < requiredCount) {
+            std::cout << "------------------------------\n";
+            std::cout << "\n------------------------------\n";
+            std::cout << "Status: WA\n";
+            std::cout << "Reason: Insufficient input tokens (need " << requiredCount << ", got " << inlineTokens.size() << ")\n";
+            return 0;
+        }
+        
+        std::cout << "------------------------------\n";
         RunResult run = runProcess(targetExe.value(), args, inlineInput, limits, false, false, false, true);
         std::cout << "\n------------------------------\n";
         if (run.timedOut) {
@@ -593,8 +634,9 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    std::cout << "\n------------------------------\n";
+    std::cout << "------------------------------\n";
     RunResult run = runProcess(targetExe.value(), args, std::string(), limits, true, false, false, true);
+    std::cout << "\n------------------------------\n";
     if (run.timedOut) {
         std::cout << "Status: TEL\n";
     } else if (run.memExceeded) {
