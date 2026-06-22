@@ -1,5 +1,7 @@
 # Assessment Judge (AJ)
 
+English | [简体中文](README_CN.md)
+
 A Windows C++ command-line tool to run `.exe` programs under a simulated terminal environment and report execution time and memory usage.
 
 ## Build
