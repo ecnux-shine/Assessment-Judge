@@ -372,8 +372,8 @@ static void printUsage() {
     std::cout << "Assessment Judge (aj) usage:\n";
     std::cout << "  aj.exe program.exe\n";
     std::cout << "  aj.exe program.exe -i \"input content\"\n";
-    std::cout << "  aj.exe program.exe -f \"tests.txt\"\n";
-    std::cout << "  aj.exe program.exe -f \"tests.txt\" -a\n";
+    std::cout << "  aj.exe program.exe -f tests.txt\n";
+    std::cout << "  aj.exe program.exe -f tests.txt -a\n";
     std::cout << "  aj.exe program.exe -ct 200 -cm 200 -i \"input\"\n";
     std::cout << "  aj.exe -c time 200 memory 200\n";
     std::cout << "Default limits: time=1000ms, memory=256MB.\n";
@@ -482,60 +482,78 @@ int main(int argc, char* argv[]) {
     }
 
     if (!filePath.empty()) {
-        std::string fileContent = readFileContent(filePath);
-        if (fileContent.empty()) {
-            std::cerr << "Could not read input file or file is empty.\n";
-            return 1;
-        }
-        std::vector<std::string> tokens = splitTokens(fileContent);
-        if (tokens.empty()) {
-            std::cerr << "No tokens found in test file.\n";
+        std::ifstream in(filePath);
+        if (!in) {
+            std::cerr << "Could not read input file.\n";
             return 1;
         }
 
-        int groupSize = explicitGroupSize;
-        if (groupSize <= 0) {
-            int maxTry = (int)std::min<size_t>(10, tokens.size());
-            for (int trySize = 1; trySize <= maxTry; ++trySize) {
-                std::string groupInput;
-                for (int idx = 0; idx < trySize; ++idx) {
-                    if (idx) groupInput += " ";
-                    groupInput += tokens[idx];
+        std::vector<std::string> testCases;
+
+        std::string line;
+        std::string currentCase;
+
+        while (std::getline(in, line)) {
+
+            if (line.empty()) {
+
+                if (!currentCase.empty()) {
+                    testCases.push_back(currentCase);
+                    currentCase.clear();
                 }
-                RunResult probe = runProcess(targetExe.value(), args, groupInput, limits, false, false, false, false);
-                if (!probe.launched) continue;
-                if (!probe.timedOut && !probe.memExceeded && probe.exitCode == 0) {
-                    groupSize = trySize;
-                    break;
+
+            } else {
+
+                if (!currentCase.empty()) {
+                    currentCase += '\n';
                 }
-            }
-            if (groupSize <= 0) {
-                groupSize = (int)tokens.size();
+
+                currentCase += line;
             }
         }
 
-        int totalGroups = (int)tokens.size() / groupSize;
-        int remainder = (int)tokens.size() % groupSize;
+        if (!currentCase.empty()) {
+            testCases.push_back(currentCase);
+        }
+
+        if (testCases.empty()) {
+            std::cerr << "No test cases found.\n";
+            return 1;
+        }
+
+        int totalGroups = (int)testCases.size();
+
         std::map<std::string, int> stats;
         uint64_t totalTime = 0;
         uint64_t totalMemory = 0;
         int executedRuns = 0;
 
         for (int groupIndex = 0; groupIndex < totalGroups; ++groupIndex) {
-            std::string groupInput;
-            for (int j = 0; j < groupSize; ++j) {
-                if (j) groupInput += " ";
-                groupInput += tokens[groupIndex * groupSize + j];
-            }
+
+            std::string groupInput = testCases[groupIndex];
+
             if (allDetails) {
                 std::cout << "====================[" << (groupIndex + 1) << "]====================\n";
                 std::cout << "------------------------------\n";
             }
-            RunResult run = runProcess(targetExe.value(), args, groupInput, limits, false, false, false, allDetails);
-            executedRuns += 1;
+
+            RunResult run = runProcess(
+                targetExe.value(),
+                args,
+                groupInput,
+                limits,
+                false,
+                false,
+                false,
+                allDetails
+            );
+
+            executedRuns++;
             totalTime += run.elapsedMs;
             totalMemory += run.peakMemoryBytes;
+
             std::string status;
+
             if (run.timedOut) {
                 status = "TEL";
             } else if (run.memExceeded) {
@@ -545,7 +563,9 @@ int main(int argc, char* argv[]) {
             } else {
                 status = "AC";
             }
-            stats[status] += 1;
+
+            stats[status]++;
+
             if (allDetails) {
                 std::cout << "\n------------------------------\n";
                 std::cout << "Status: " << status << "\n";
@@ -555,22 +575,10 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        if (remainder > 0) {
-            executedRuns += 1;
-            stats["WA"] += 1;
-            if (allDetails) {
-                std::cout << "====================[" << (totalGroups + 1) << "]====================\n";
-                std::cout << "------------------------------\n";
-                std::cout << "Status: WA\n";
-                std::cout << "Reason: Insufficient input tokens (need " << groupSize << ", got " << remainder << ")\n";
-                std::cout << "------------------------------\n\n";
-            }
-        }
-
         if (!allDetails) {
-            if (executedRuns - (remainder > 0 ? 1 : 0) > 0) {
-                uint64_t avgTime = totalTime / (executedRuns - (remainder > 0 ? 1 : 0));
-                uint64_t avgMemory = totalMemory / (executedRuns - (remainder > 0 ? 1 : 0));
+            if (executedRuns > 0) {
+                uint64_t avgTime = totalTime / executedRuns;
+                uint64_t avgMemory = totalMemory / executedRuns;
                 std::cout << "Average Time: " << avgTime << "ms\n";
                 std::cout << "Average Memory: " << formatMemory(avgMemory) << " MB\n";
             } else {

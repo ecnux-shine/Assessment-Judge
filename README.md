@@ -47,7 +47,7 @@ aj.exe program.exe -i "input content"
 Multi-data test mode:
 
 ```bat
-aj.exe program.exe -f "tests.txt"
+aj.exe program.exe -f tests.txt
 ```
 
 Output all detailed results per case:
@@ -73,5 +73,6 @@ aj.exe -c time 200 memory 200
 - Default time limit: `1000 ms` (1 second)
 - Default memory limit: `256 MB`
 - Manual mode pauses timing while waiting for user input
-- Multi-data mode splits test file contents by whitespace and runs repeated cases
+- Multi-data mode uses blank lines to separate test cases.
+- Each test case may contain multiple lines of input.
 - If the test data file leaves an incomplete final case, it is counted as a WA (Wrong Answer)
