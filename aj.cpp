@@ -555,7 +555,7 @@ int main(int argc, char* argv[]) {
             std::string status;
 
             if (run.timedOut) {
-                status = "TEL";
+                status = "TLE";
             } else if (run.memExceeded) {
                 status = "MLE";
             } else if (run.exitCode != 0) {
@@ -588,7 +588,7 @@ int main(int argc, char* argv[]) {
             int totalCount = executedRuns;
             std::cout << "All Statuses: ";
             std::cout << "AC: " << stats["AC"] << "/" << totalCount << "      ";
-            std::cout << "TEL: " << stats["TEL"] << "/" << totalCount << "      ";
+            std::cout << "TLE: " << stats["TLE"] << "/" << totalCount << "      ";
             std::cout << "WA: " << stats["WA"] << "/" << totalCount << "      ";
             std::cout << "MLE: " << stats["MLE"] << "/" << totalCount << "\n";
         }
@@ -629,7 +629,7 @@ int main(int argc, char* argv[]) {
         RunResult run = runProcess(targetExe.value(), args, inlineInput, limits, false, false, false, true);
         std::cout << "\n------------------------------\n";
         if (run.timedOut) {
-            std::cout << "Status: TEL\n";
+            std::cout << "Status: TLE\n";
         } else if (run.memExceeded) {
             std::cout << "Status: MLE\n";
         } else if (run.exitCode != 0) {
@@ -646,7 +646,7 @@ int main(int argc, char* argv[]) {
     RunResult run = runProcess(targetExe.value(), args, std::string(), limits, true, false, false, true);
     std::cout << "\n------------------------------\n";
     if (run.timedOut) {
-        std::cout << "Status: TEL\n";
+        std::cout << "Status: TLE\n";
     } else if (run.memExceeded) {
         std::cout << "Status: MLE\n";
     } else if (run.exitCode != 0) {

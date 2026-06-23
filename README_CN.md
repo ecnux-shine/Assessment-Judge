@@ -10,7 +10,7 @@
 - **精确时间统计**：用户输入时间不计入统计
 - **内存监控**：实时追踪程序内存占用
 - **灵活的限制配置**：可自定义时间和内存上限
-- **详细的执行报告**：显示运行状态（AC/TEL/WA/MLE）
+- **详细的执行报告**：显示运行状态（AC/TLE/WA/MLE）
 
 ## 编译
 
@@ -71,7 +71,7 @@ aj.exe program.exe -i "输入内容"
 输出示例：
 ```
 ------------------------------
-Status: TEL
+Status: TLE
 ```
 
 ### 模式三：多数据批量测试模式
@@ -92,7 +92,7 @@ aj.exe program.exe -f tests.txt
 ```
 Average Time: 135ms
 Average Memory: 200 MB
-All Statuses: AC: 31/40      TEL: 2/40      WA: 8/40      MLE: 0/40
+All Statuses: AC: 31/40      TLE: 2/40      WA: 8/40      MLE: 0/40
 ```
 
 ### 输出所有详细结果
@@ -158,7 +158,7 @@ aj.exe -c time 200 memory 200
 | 状态 | 含义 | 说明 |
 |------|------|------|
 | AC | Accepted（通过） | 程序正常运行完成，内存和时间都在限制内 |
-| TEL | Time Exceeded Limit（超时） | 程序运行时间超过了时间限制 |
+| TLE | Time Limit Exceeded（超时） | 程序运行时间超过了时间限制 |
 | MLE | Memory Limit Exceeded（超内存） | 程序占用内存超过了内存限制 |
 | WA | Wrong Answer（答案错误） | 程序异常退出或返回非零退出码 |
 
