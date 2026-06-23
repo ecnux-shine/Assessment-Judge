@@ -292,7 +292,7 @@ static RunResult runProcess(
 
     if (interactiveInput) {
         while (true) {
-            DWORD wait = WaitForSingleObject(pi.hProcess, 100);
+            DWORD wait = WaitForSingleObject(pi.hProcess, 0);
             if (wait == WAIT_OBJECT_0) break;
             pauseTimer();
             std::string line;
@@ -304,7 +304,7 @@ static RunResult runProcess(
             DWORD written = 0;
             WriteFile(childStdInWrite, line.data(), (DWORD)line.size(), &written, NULL);
             FlushFileBuffers(childStdInWrite);
-            Sleep(50);
+            Sleep(1);
         }
         CloseHandle(childStdInWrite);
     }
