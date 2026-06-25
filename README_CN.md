@@ -12,32 +12,6 @@
 - **灵活的限制配置**：可自定义时间和内存上限
 - **详细的执行报告**：显示运行状态（AC/TLE/WA/MLE）
 
-## 编译
-
-### 方案一：MSVC（Visual Studio）
-
-使用 **Visual Studio 开发者命令提示符**（Developer Command Prompt for Visual Studio）：
-
-```batch
-cd path\to\AssessmentJudge
-rc /fo assets\resource.res assets\resource.rc
-cl /EHsc aj.cpp assets\resource.res psapi.lib
-```
-
-这将生成带有 favicon 图标的 `aj.exe`。
-
-### 方案二：MinGW/GCC（MSYS2 或独立版）
-
-在 shell 中运行：
-
-```bash
-cd path/to/AssessmentJudge
-windres assets/resource.rc -o assets/resource.o
-g++ aj.cpp assets/resource.o -std=c++17 -O2 -o aj.exe -lpsapi
-```
-
-这将生成带有 favicon 图标的 `aj.exe`。
-
 ## 使用方法
 
 ### 模式一：手动输入模式
